@@ -36,6 +36,7 @@ export default function Home() {
   const [loadedSounds, setLoadedSounds] = useState<string[]>([]);
   const [samplesReady, setSamplesReady] = useState(false);
   const [mobileTab, setMobileTab] = useState<MobileTab>("repl");
+  const [lastCodeFromAi, setLastCodeFromAi] = useState(false);
   const isMobile = useIsMobile();
 
   const handleInsertCode = useCallback((code: string) => {
@@ -43,6 +44,7 @@ export default function Home() {
       editor?: { stop: () => void };
     } | null;
     if (editor) {
+      setLastCodeFromAi(true);
       editor.setAttribute("code", code);
       // Re-evaluate so the new code starts playing immediately
       document.dispatchEvent(new CustomEvent("repl-evaluate"));
@@ -61,6 +63,7 @@ export default function Home() {
     } | null;
     const cm = el?.editor?.editor;
     if (cm) {
+      setLastCodeFromAi(true);
       const pos = cm.state.selection.main.head;
       cm.dispatch({ changes: { from: pos, insert: code } });
     }
@@ -90,7 +93,7 @@ export default function Home() {
         <div className="flex-1 overflow-hidden" style={{ paddingBottom: 52 }}>
           {mobileTab === "repl" && (
             <div className="h-full">
-              <StrudelRepl onSamplesLoaded={handleSamplesLoaded} />
+              <StrudelRepl onSamplesLoaded={handleSamplesLoaded} lastCodeFromAi={lastCodeFromAi} />
             </div>
           )}
           {mobileTab === "docs" && (
@@ -164,7 +167,7 @@ export default function Home() {
 
         {/* REPL (center) */}
         <div className="flex-1 min-w-0 overflow-hidden">
-          <StrudelRepl onSamplesLoaded={handleSamplesLoaded} />
+          <StrudelRepl onSamplesLoaded={handleSamplesLoaded} lastCodeFromAi={lastCodeFromAi} />
         </div>
 
         {/* Chat panel */}

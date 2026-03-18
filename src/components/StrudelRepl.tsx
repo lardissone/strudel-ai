@@ -34,8 +34,10 @@ export type SampleLoadingState = "loading" | "ready" | "error";
 
 export default function StrudelRepl({
   onSamplesLoaded,
+  lastCodeFromAi,
 }: {
   onSamplesLoaded?: (state: SampleLoadingState, sounds: string[]) => void;
+  lastCodeFromAi?: boolean;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const replRef = useRef<HTMLElement | null>(null);
@@ -139,30 +141,51 @@ export default function StrudelRepl({
     return () => document.removeEventListener("keydown", onKeyDown, true);
   }, []);
 
-  // Listen for strudel log events to surface "sound not found" errors
+  // Listen for strudel log events to surface errors (parse errors, sound not found, etc.)
   useEffect(() => {
     const handler = (e: Event) => {
       const detail = (e as CustomEvent).detail;
       const msg = detail?.message ?? "";
-      const match = msg.match(/sound (.+?) not found/);
-      if (match) {
+
+      let hint: string | null = null;
+      const aiLabel = lastCodeFromAi ? " (in AI-generated code)" : "";
+
+      // Parse errors from mini-notation or JS evaluation
+      if (/parse error/i.test(msg) || /\[mini\]/i.test(msg)) {
+        // Extract a concise description from the error
+        const lineMatch = msg.match(/line (\d+)/);
+        const lineInfo = lineMatch ? ` on line ${lineMatch[1]}` : "";
+        hint = `Parse error${lineInfo}${aiLabel}: ${msg.length > 200 ? msg.slice(0, 200) + "…" : msg}`;
+      }
+      // Reference errors, type errors, syntax errors from code evaluation
+      else if (/ReferenceError|TypeError|SyntaxError/i.test(msg)) {
+        hint = `Code error${aiLabel}: ${msg.length > 200 ? msg.slice(0, 200) + "…" : msg}`;
+      }
+      // Sound not found errors
+      else if (/sound (.+?) not found/.test(msg)) {
+        const match = msg.match(/sound (.+?) not found/)!;
         const name = match[1];
-        let hint: string;
         if (sampleState === "loading") {
-          hint = `Sound "${name}" not found. Sample banks are still loading — try again in a moment.`;
+          hint = `Sound "${name}" not found${aiLabel}. Sample banks are still loading — try again in a moment.`;
         } else if (/^[A-Z]/.test(name) || /\d{2,}/.test(name)) {
-          // Looks like a bank name (e.g. RolandTR909, AkaiMPC60) — suggest .bank() syntax
-          hint = `"${name}" is a drum machine bank, not a sound name. Use: s("bd sd hh cp").bank("${name}")`;
+          hint = `"${name}" is a drum machine bank, not a sound name${aiLabel}. Use: s("bd sd hh cp").bank("${name}")`;
         } else {
-          hint = `Sound "${name}" not found. Try a built-in synth (sawtooth, square, triangle, sine) or check the name.`;
+          hint = `Sound "${name}" not found${aiLabel}. Try a built-in synth (sawtooth, square, triangle, sine) or check the name.`;
         }
+      }
+      // Catch-all for other error-level messages
+      else if (detail?.type === "error" || /\berror\b/i.test(msg)) {
+        hint = `Error${aiLabel}: ${msg.length > 200 ? msg.slice(0, 200) + "…" : msg}`;
+      }
+
+      if (hint) {
         setErrorToast(hint);
-        setTimeout(() => setErrorToast(null), 8000);
+        setTimeout(() => setErrorToast(null), 10000);
       }
     };
     document.addEventListener("strudel.log", handler);
     return () => document.removeEventListener("strudel.log", handler);
-  }, [sampleState]);
+  }, [sampleState, lastCodeFromAi]);
 
   const handleToggle = useCallback(async () => {
     // Work around superdough bug: AudioContext.resume() is never called
@@ -266,17 +289,24 @@ export default function StrudelRepl({
         </span>
       </div>
 
-      {/* Error toast for sound-not-found */}
+      {/* Error toast for evaluation errors */}
       {errorToast && (
         <div
-          className="px-3 py-1.5 text-xs flex-shrink-0"
+          className="px-3 py-1.5 text-xs flex-shrink-0 flex items-start gap-2"
           style={{
             background: "#fef2f2",
             color: "#991b1b",
             borderBottom: "1px solid #fecaca",
           }}
         >
-          {errorToast}
+          <span className="flex-1">{errorToast}</span>
+          <button
+            onClick={() => setErrorToast(null)}
+            className="opacity-60 hover:opacity-100 cursor-pointer flex-shrink-0"
+            style={{ color: "#991b1b" }}
+          >
+            ✕
+          </button>
         </div>
       )}
 
