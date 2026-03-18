@@ -68,7 +68,12 @@ The .s() function takes instrument names (bd, sd, hh, cp, etc.), and .bank() sel
   let prompt = BASE_SYSTEM_PROMPT + sampleInfo;
 
   if (currentCode) {
-    prompt += `\n\nThe user's current code in the editor:\n\`\`\`\n${currentCode}\n\`\`\`\nWhen the user asks to modify, fix, or build on their code, use this as context. When suggesting changes, provide the complete updated code so they can use "Replace REPL" to apply it.`;
+    prompt += `\n\nThe user's current code in the editor:\n\`\`\`\n${currentCode}\n\`\`\`\nIMPORTANT: This is the user's current working code. When the user asks to change, modify, or improve something:
+- Always start from this exact code as the base.
+- Only modify the specific parts the user is asking about. Keep everything else UNCHANGED.
+- Do NOT rewrite the entire code from scratch or generate a completely new pattern.
+- For example, if the user says "replace the bass line", find the bass line in the existing code and change only that part.
+- Provide the complete updated code (with your targeted changes applied) so they can use "Replace REPL" to apply it.`;
   }
 
   return prompt;
@@ -201,7 +206,12 @@ export async function POST(req: NextRequest) {
   const loadedSounds = Array.isArray(body.loadedSounds)
     ? (body.loadedSounds as unknown[]).filter((s): s is string => typeof s === "string").slice(0, 2000)
     : undefined;
-  const currentCode = typeof body.currentCode === "string" ? body.currentCode.slice(0, 5000) : undefined;
+  const rawCode = typeof body.currentCode === "string" ? body.currentCode : undefined;
+  const currentCode = rawCode
+    ? rawCode.length > 5000
+      ? rawCode.slice(0, 5000) + "\n// ... code truncated ..."
+      : rawCode
+    : undefined;
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
