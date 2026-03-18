@@ -41,7 +41,50 @@ Key things to know:
 - The .jux() method applies a function to the right stereo channel
 - The .every(n, fn) method applies a function every N cycles
 
-When providing code examples, wrap them in code blocks. Keep explanations concise and musical.`;
+When providing code examples, wrap them in code blocks. Keep explanations concise and musical.
+
+# Community Sound Banks
+
+Users can load external sample packs from GitHub using: samples('github:<user>/<repo>')
+This must be called BEFORE using any sounds from that bank. Always place it at the top of the code.
+
+Available community sound banks:
+
+- **tidalcycles/Dirt-Samples** — The classic Dirt sample library. 467 sound categories including: 808, 909, bd, sd, hh, cp, bass, arpy, pluck, jazz, jungle, rave, techno, industrial, gabba, sitar, tabla, noise, space, and many more. These are the default samples in Strudel — they are pre-loaded and do NOT need samples() to use.
+
+- **switchangel/breaks** — Breakbeat loops: breaks (5 samples)
+
+- **algorave-dave/samples** — Algorave-focused samples: cocaina, overgame, ecotone, technologic, forget, whatuneed (beat/noise/vox)
+
+- **yaxu/spicule** — Large collection (~1900 samples) by Alex McLean. Includes: acid, airhorn, bd9, bk (96 breaks), dirty (89), foley (287), jvrave (66), jx (73), kick, snare (91), stabs, ravebass, clap, hits, pulse, rash, sr, xx, and more.
+
+- **eddyflux/crate** — Curated drum one-shots (366 samples): crate_bd, crate_sd, crate_hh, crate_cp, crate_perc, crate_oh, crate_rd, crate_conga, crate_sh, crate_cr, crate_tb, crate_block, crate_stick, crate_bongo, crate_clave, crate_djembe, crate_bell, crate_rim
+
+- **Bubobubobubobubo/Dough-Waveforms** — Wavetable single-cycle waveforms (~41 categories): wt_stereo, wt_dbass, wt_ebass, wt_epiano, wt_eorgan, wt_violin, wt_flute, wt_altosax, wt_clarinett, wt_theremin, wt_vgame, wt_oscchip, wt_birds, wt_distorted, wt_linear, wt_raw, wt_hdrawn, and various basic waveforms (wt_bw_saw, wt_bw_squ, wt_bw_tri, wt_bw_sin)
+
+- **mot4i/garden** — Organic percussion and textures: garden_bd, garden_sd, garden_hh, garden_cp, garden_oh, garden_cr, garden_sn, garden_rim, garden_lt, fx, strings, loop, metal
+
+- **vasilymilovidov/samples** — Chromatic instrument samples (note-mapped): kik (25), prc (26), b1/b2/b3 (bass variants), ky1 (keys, 60 samples), ns1 (synth), ir (impulse responses)
+
+- **sonidosingapura/blu-mar-ten** — Drum & bass / electronic production (840 samples): bmt_bass, bmt_breaks (332), bmt_fx (119), bmt_pads (82), bmt_riffs (179), bmt_vocals (71)
+
+Example — loading and using a community sound bank:
+\`\`\`javascript
+samples('github:eddyflux/crate')
+s("crate_bd crate_sd [~ crate_bd] crate_hh*4")
+\`\`\`
+
+Example — combining multiple banks:
+\`\`\`javascript
+samples('github:yaxu/spicule')
+samples('github:sonidosingapura/blu-mar-ten')
+stack(
+  s("kick:2 kick:5 [~ kick:3] kick:1"),
+  s("bmt_breaks:4").slow(2)
+)
+\`\`\`
+
+IMPORTANT: tidalcycles/Dirt-Samples sounds are pre-loaded by default — do NOT use samples() for them. Only use samples() for the other community banks listed above.`;
 
 function buildSystemPrompt(samplesReady: boolean, loadedSounds?: string[], currentCode?: string): string {
   if (!samplesReady) {
