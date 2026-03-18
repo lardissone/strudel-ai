@@ -1,43 +1,44 @@
 # Strudel AI
 
-[![GitHub](https://img.shields.io/github/license/lardissone/strudel-ai)](https://github.com/lardissone/strudel-ai)
+[![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-blue.svg)](https://github.com/lardissone/strudel-ai/blob/main/LICENSE)
 
-A live-coding music environment powered by [Strudel](https://strudel.cc) with an integrated AI chat assistant. Ask the AI about patterns, mini-notation, and music programming — then insert generated code directly into the REPL.
+**Live-code music with AI by your side.**
 
-## Setup
+Strudel AI is a browser-based music environment built on [Strudel](https://strudel.cc) with an integrated AI assistant powered by Claude. Ask it about patterns, mini-notation, and music programming — then drop generated code straight into the REPL and hear it play.
+
+---
+
+## Features
+
+- **Live REPL** — Write and hear Strudel patterns in real time
+- **AI Chat** — Ask Claude about patterns, sounds, and mini-notation; insert suggestions directly into the editor
+- **Docs Sidebar** — Quick reference for mini-notation, pattern methods, and available sounds
+- **Keyboard-first** — `Cmd+Enter` to play, `Cmd+.` to stop
+
+## Quick Start
 
 ```bash
 npm install
-```
-
-### Environment Variables
-
-| Variable | Required | Default | Description |
-|---|---|---|---|
-| `ANTHROPIC_API_KEY` | Yes | — | Anthropic API key for the AI chat assistant |
-| `ANTHROPIC_MODEL` | No | `claude-sonnet-4-6` | Anthropic model used by `/api/chat` |
-| `ANTHROPIC_MAX_TOKENS` | No | `4096` | Max tokens requested per AI response |
-| `RATE_LIMIT_MAX` | No | `20` | Max chat requests per IP per minute |
-
-Create a `.env.local` file:
-
-```bash
-ANTHROPIC_API_KEY=sk-ant-...
-```
-
-## Development
-
-```bash
+cp .env.local.example .env.local  # add your ANTHROPIC_API_KEY
 npm run dev
 ```
 
-Open [http://localhost:3434](http://localhost:3434).
+Open [http://localhost:3434](http://localhost:3434) and start making music.
 
-## Production
+## Environment Variables
+
+| Variable | Required | Default | Description |
+|---|---|---|---|
+| `ANTHROPIC_API_KEY` | Yes | — | Anthropic API key for the AI chat |
+| `ANTHROPIC_MODEL` | No | `claude-sonnet-4-6` | Model used by `/api/chat` |
+| `ANTHROPIC_MAX_TOKENS` | No | `4096` | Max tokens per AI response |
+| `RATE_LIMIT_MAX` | No | `20` | Max chat requests per IP per minute |
+
+## Deployment
 
 ### Vercel
 
-Deploy with the Vercel CLI or connect the repo. Set `ANTHROPIC_API_KEY` in the Vercel dashboard under Environment Variables. The repo includes [`vercel.json`](vercel.json) to target the Next.js framework, `iad1`, and a `30` second max duration for the chat route.
+Connect the repo or deploy with the Vercel CLI. Set `ANTHROPIC_API_KEY` in the dashboard under Environment Variables. The included [`vercel.json`](vercel.json) targets Next.js on `iad1` with a 30s max duration for the chat route.
 
 ### Manual
 
@@ -46,16 +47,12 @@ npm run build
 npm start
 ```
 
-Note: Docker deployment is not documented here because the repo does not currently include a `Dockerfile`.
+## Tech Stack
 
-## Architecture
-
-- **Next.js 16** with App Router and React 19
-- **`/api/chat`** — streaming AI endpoint (SSE) backed by Claude, with in-memory rate limiting
+- **Next.js 16** — App Router + React 19
+- **Claude API** — Streaming AI responses via SSE with in-memory rate limiting
 - **Strudel REPL** — `@strudel/repl` web component for live music coding
-- **AI Chat Panel** — streams responses and offers "Insert into REPL" for code blocks
-- **Docs Sidebar** — quick reference for mini-notation, pattern methods, and sounds
 
 ## License
 
-AGPL-3.0-only
+[AGPL-3.0-only](LICENSE)
