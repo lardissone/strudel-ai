@@ -162,7 +162,7 @@ export default function AboutModal({ open, onClose }: AboutModalProps) {
             </a>
             . Source code is available on{" "}
             <a
-              href="https://github.com/lardissone/strudel-app"
+              href="https://github.com/lardissone/strudel-ai"
               target="_blank"
               rel="noopener noreferrer"
               className="about-link"
