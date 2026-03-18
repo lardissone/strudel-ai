@@ -18,6 +18,44 @@ const StrudelRepl = dynamic(() => import("@/components/StrudelRepl"), {
 
 type MobileTab = "repl" | "docs" | "chat";
 
+/**
+ * Lightweight validation for Strudel code. Returns an array of warning messages.
+ * Does NOT block execution — just surfaces potential issues to the user.
+ */
+function validateStrudelCode(code: string): string[] {
+  const warnings: string[] = [];
+
+  // Check for pipe characters inside string literals (mini-notation patterns)
+  // Match string contents inside single or double quotes
+  const stringPattern = /(['"`])(?:(?!\1|\\).|\\.)*\1/g;
+  let match;
+  while ((match = stringPattern.exec(code)) !== null) {
+    const content = match[0].slice(1, -1); // strip quotes
+    if (content.includes("|")) {
+      warnings.push(
+        `Invalid "|" (pipe) found in pattern "${content.length > 40 ? content.slice(0, 40) + "…" : content}". ` +
+        `The pipe character is not valid mini-notation — use spaces or square brackets instead.`
+      );
+    }
+  }
+
+  // Check for unbalanced brackets/parens in the overall code
+  let parens = 0, brackets = 0, braces = 0;
+  for (const ch of code) {
+    if (ch === "(") parens++;
+    else if (ch === ")") parens--;
+    else if (ch === "[") brackets++;
+    else if (ch === "]") brackets--;
+    else if (ch === "{") braces++;
+    else if (ch === "}") braces--;
+  }
+  if (parens !== 0) warnings.push(`Unbalanced parentheses in code (${parens > 0 ? `${parens} unclosed` : `${-parens} extra closing`}).`);
+  if (brackets !== 0) warnings.push(`Unbalanced square brackets in code (${brackets > 0 ? `${brackets} unclosed` : `${-brackets} extra closing`}).`);
+  if (braces !== 0) warnings.push(`Unbalanced curly braces in code (${braces > 0 ? `${braces} unclosed` : `${-braces} extra closing`}).`);
+
+  return warnings;
+}
+
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(false);
   useEffect(() => {
@@ -44,6 +82,15 @@ export default function Home() {
       editor?: { stop: () => void };
     } | null;
     if (editor) {
+      // Validate AI-generated code and surface warnings
+      const warnings = validateStrudelCode(code);
+      if (warnings.length > 0) {
+        // Emit as strudel.log so the error toast picks it up
+        document.dispatchEvent(new CustomEvent("strudel.log", {
+          detail: { message: warnings[0], type: "error" },
+        }));
+      }
+
       setLastCodeFromAi(true);
       editor.setAttribute("code", code);
       // Re-evaluate so the new code starts playing immediately
