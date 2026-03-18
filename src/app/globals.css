@@ -1,0 +1,173 @@
+@import "tailwindcss";
+
+:root {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  --panel-bg: #141414;
+  --panel-border: #2a2a2a;
+  --accent: #7c3aed;
+  --accent-hover: #6d28d9;
+  --chat-user: #1e1e2e;
+  --chat-assistant: #1a1a2a;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: "Geist Mono", monospace;
+  --font-mono: "Geist Mono", monospace;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: "Geist Mono", monospace;
+  margin: 0;
+  overflow: hidden;
+  height: 100vh;
+}
+
+/* Strudel editor overrides */
+strudel-editor {
+  --foreground: #ededed;
+  display: none;
+}
+
+/* The strudel web component inserts the actual CodeMirror editor as a sibling div */
+strudel-editor + div {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+strudel-editor + div .cm-editor {
+  height: 100%;
+  flex: 1;
+  overflow: auto;
+}
+
+strudel-editor + div .cm-scroller {
+  overflow: auto !important;
+}
+
+/* Chat markdown styling */
+.prose-xs {
+  font-size: 0.75rem;
+  line-height: 1.625;
+}
+.prose-xs p {
+  margin: 0.5em 0;
+}
+.prose-xs p:first-child {
+  margin-top: 0;
+}
+.prose-xs p:last-child {
+  margin-bottom: 0;
+}
+.prose-xs ul,
+.prose-xs ol {
+  margin: 0.5em 0;
+  padding-left: 1.5em;
+}
+.prose-xs li {
+  margin: 0.25em 0;
+}
+.prose-xs h1,
+.prose-xs h2,
+.prose-xs h3,
+.prose-xs h4 {
+  margin: 0.75em 0 0.25em;
+  font-weight: 600;
+}
+.prose-xs h1 { font-size: 1.1em; }
+.prose-xs h2 { font-size: 1em; }
+.prose-xs h3 { font-size: 0.95em; }
+.prose-xs blockquote {
+  border-left: 2px solid var(--panel-border);
+  padding-left: 0.75em;
+  margin: 0.5em 0;
+  opacity: 0.8;
+}
+.prose-xs table {
+  border-collapse: collapse;
+  margin: 0.5em 0;
+  font-size: inherit;
+}
+.prose-xs th,
+.prose-xs td {
+  border: 1px solid var(--panel-border);
+  padding: 0.25em 0.5em;
+}
+.prose-xs a {
+  color: var(--accent);
+  text-decoration: underline;
+}
+.prose-xs strong {
+  font-weight: 700;
+}
+
+/* About modal links */
+.about-link {
+  color: var(--accent);
+  text-decoration: none;
+}
+.about-link:hover {
+  text-decoration: underline;
+}
+
+/* Dialog backdrop */
+dialog::backdrop {
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--panel-bg);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--panel-border);
+  border-radius: 3px;
+}
+
+/* Mobile bottom tab bar */
+.mobile-tab-bar {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .mobile-tab-bar {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    background: var(--panel-bg);
+    border-top: 1px solid var(--panel-border);
+  }
+
+  .mobile-tab-bar button {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 8px 4px;
+    background: none;
+    border: none;
+    color: var(--foreground);
+    opacity: 0.5;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 10px;
+  }
+
+  .mobile-tab-bar button.active {
+    opacity: 1;
+    color: var(--accent);
+  }
+}
