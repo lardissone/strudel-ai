@@ -145,6 +145,18 @@ function FunctionEntry({ entry, onExampleClick }: { entry: DocEntry; onExampleCl
   );
 }
 
+const communityBanks = [
+  { repo: "tidalcycles/Dirt-Samples", desc: "Classic Dirt library (467 sounds) — pre-loaded by default", preloaded: true },
+  { repo: "switchangel/breaks", desc: "Breakbeat loops (5 samples)" },
+  { repo: "algorave-dave/samples", desc: "Algorave-focused beats & noise" },
+  { repo: "yaxu/spicule", desc: "~1900 samples by Alex McLean: breaks, foley, acid, stabs & more" },
+  { repo: "eddyflux/crate", desc: "366 curated drum one-shots" },
+  { repo: "Bubobubobubobubo/Dough-Waveforms", desc: "Single-cycle wavetable waveforms (~41 categories)" },
+  { repo: "mot4i/garden", desc: "Organic percussion and textures" },
+  { repo: "vasilymilovidov/samples", desc: "Chromatic instruments (note-mapped)" },
+  { repo: "sonidosingapura/blu-mar-ten", desc: "Drum & bass / electronic (840 samples)" },
+];
+
 const miniNotationRows = [
   ["a b", "Sequence"],
   ["a b c d", "Even subdivision"],
@@ -176,6 +188,7 @@ export default function DocsSidebar({
     new Set(["Pattern Transformations", "Controls & Effects"])
   );
   const [miniNotationOpen, setMiniNotationOpen] = useState(true);
+  const [soundBanksOpen, setSoundBanksOpen] = useState(false);
 
   const allCategories = useMemo(() => categorize(reference.docs as DocEntry[]), []);
 
@@ -289,6 +302,44 @@ export default function DocsSidebar({
                     ))}
                   </tbody>
                 </table>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Community Sound Banks (always shown, not affected by search) */}
+        {!search.trim() && (
+          <div>
+            <button
+              onClick={() => setSoundBanksOpen(!soundBanksOpen)}
+              className="w-full text-left text-xs font-semibold py-1.5 px-2 rounded hover:bg-white/5 flex items-center justify-between cursor-pointer"
+            >
+              Community Sound Banks
+              <span className="opacity-50">{soundBanksOpen ? "▾" : "▸"}</span>
+            </button>
+            {soundBanksOpen && (
+              <div className="px-2 py-2 space-y-2">
+                <p className="text-[10px] opacity-60 leading-snug">
+                  Load with: <code className="text-purple-400">samples(&apos;github:user/repo&apos;)</code>
+                </p>
+                <ul className="list-none p-0 space-y-1">
+                  {communityBanks.map((bank) => (
+                    <li key={bank.repo} className="text-xs">
+                      <a
+                        href={`https://github.com/${bank.repo}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-purple-400 hover:underline font-mono text-[10px]"
+                      >
+                        {bank.repo}
+                      </a>
+                      {bank.preloaded && (
+                        <span className="ml-1 text-[9px] opacity-50 font-semibold uppercase">pre-loaded</span>
+                      )}
+                      <p className="opacity-60 text-[10px] leading-snug mt-0.5">{bank.desc}</p>
+                    </li>
+                  ))}
+                </ul>
               </div>
             )}
           </div>
