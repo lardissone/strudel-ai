@@ -113,15 +113,17 @@ export default function StrudelRepl({
     });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Global keyboard shortcut: Ctrl+Enter (or Cmd+Enter on macOS) to play,
-  // Ctrl+. (or Cmd+. on macOS) to stop. Works even when the editor is not focused
-  // and prevents the macOS Ctrl+Enter context-menu trigger.
+  // Global keyboard shortcut: Ctrl+Enter (or Cmd+Enter on macOS) to evaluate/play,
+  // Ctrl+. (or Cmd+. on macOS) to stop. Uses capture phase + stopPropagation so
+  // our handler fires BEFORE the strudel editor's internal CodeMirror keybinding,
+  // which would otherwise toggle (stop if playing) instead of re-evaluating.
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       const mod = isMac ? e.metaKey : e.ctrlKey;
       if (!mod) return;
       if (e.key === "Enter") {
         e.preventDefault();
+        e.stopPropagation();
         // Resume any suspended AudioContexts (same workaround as handleToggle)
         for (const ac of trackedContexts) {
           if (ac.state === "suspended") ac.resume().catch(() => {});
@@ -129,11 +131,12 @@ export default function StrudelRepl({
         document.dispatchEvent(new CustomEvent("repl-evaluate"));
       } else if (e.key === ".") {
         e.preventDefault();
+        e.stopPropagation();
         document.dispatchEvent(new CustomEvent("repl-stop"));
       }
     };
-    document.addEventListener("keydown", onKeyDown);
-    return () => document.removeEventListener("keydown", onKeyDown);
+    document.addEventListener("keydown", onKeyDown, true);
+    return () => document.removeEventListener("keydown", onKeyDown, true);
   }, []);
 
   // Listen for strudel log events to surface "sound not found" errors
